@@ -16,7 +16,7 @@ Your API must provide a way to fetch the following data:
 
 - List the available routes. You can fetch this data by querying `routes.txt`.
 - List the trips for a specified route. You can fetch this data by querying `trips.txt`.
-- List the stops for a specified trip. You can fetch this data by querying `trips.txt` and `shapes.txt`.
+- List the stops for a specified trip and direction. You can fetch this data by querying `trips.txt` and `stop_times.txt`.
 
 ### Extra credit
 
