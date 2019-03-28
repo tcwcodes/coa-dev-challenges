@@ -2,7 +2,7 @@
 
 ### Challenge
 
-Your task is to create a webpage that displays information about the Most Dangerous Dogs in Austin. This is an open‐ended challenge, so feel free to show off your creativity. This data comes from our Open Data Portal. For documentation, visit: https://data.austintexas.gov/Public-Safety/Declared-Dangerous-Dogs/ykw4-j3aj
+Your task is to create a webpage that displays information about the Dockless Scooters in Austin. This is an open‐ended challenge, so feel free to show off your creativity. This data comes from our Open Data Portal. For documentation, visit: https://data.austintexas.gov/Transportation-and-Mobility/Dockless-Vehicle-Trips/7d8e-dm7r
 
 ### How does this work?
 
@@ -15,7 +15,7 @@ If you haven't used React yet, no worries. We also have an alternative setup tha
 
 ### Resources
 
-- Endpoint to data: https://data.austintexas.gov/Public-Safety/Declared-Dangerous-Dogs/ykw4-j3aj
+- Endpoint to data: https://data.austintexas.gov/Transportation-and-Mobility/Dockless-Vehicle-Trips/7d8e-dm7r
 - SODA Developers Documentation: http://dev.socrata.com/
 - Us. If you are stuck, or need guidance, leave a comment to a line of code in Github or email us.
 

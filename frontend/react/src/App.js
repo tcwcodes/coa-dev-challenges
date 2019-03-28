@@ -1,28 +1,28 @@
-import React, { Component } from 'react';
-import './App.css';
+import React, { Component } from "react";
+import "./App.css";
 
-import axios from 'axios';
+import axios from "axios";
 
 class App extends Component {
   constructor(props) {
     super(props);
     this.state = {};
   }
-  componentWillMount() {
+
+  componentDidMount() {
     // Here is a link to the API Documentation: https://dev.socrata.com/
-    axios.get('https://data.austintexas.gov/resource/h8x4-nvyi.json')
-      .then((res) => {
+    axios
+      .get("https://data.austintexas.gov/resource/7d8e-dm7r.json")
+      .then(res => {
         console.log(res);
         // TODO: Decided how to store the response data.
-      })
+      });
   }
 
   render() {
     return (
       <div className="App">
-        <div className="App-header">
-          <h2>Dangerous Dogs</h2>
-        </div>
+        <h2>Dockless Scooters</h2>
 
         <p className="App-intro">
           {/* TODO: Delete line below */}

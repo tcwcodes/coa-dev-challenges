@@ -1,9 +1,9 @@
 $.ajax({
-    url: "https://data.austintexas.gov/resource/h8x4-nvyi.json",
-    type: "GET",
-    data: {
-      "$limit" : 5000,
-    }
+  url: "https://data.austintexas.gov/resource/7d8e-dm7r.json",
+  type: "GET",
+  data: {
+    $limit: 5000
+  }
 }).done(function(data) {
   console.log(data);
 });

@@ -1,4 +1,4 @@
-# Welcome to the City of Austin Dev Challenges
+# Welcome to the Austin Transportation Department Dev Challenges
 
 ### Goals for this exercise
 
@@ -16,4 +16,4 @@ Take an hour or two and play around with the code in this repo. Create something
 
 #### A note on time.
 
-We don't want to waste your time so please don't work more than you think is ok on this.
+We don't want to waste your time so please don't work more 2 or 3 hours on this at most. If time constrants are a real problem for you, let us know and we can discuss alternatives like sending a code sample.
