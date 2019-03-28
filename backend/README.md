@@ -1,6 +1,6 @@
 # Backend Challenge
 
-Your task is to create an API that serves Austin transit data. This is an open‐ended challenge, so feel free to show off your creativity.
+Your task is to create an API using Python that serves Austin transit data. This is an open‐ended challenge, so feel free to show off your creativity.
 
 To complete this challenge you'll need to learn about [GTFS (General Transit Feed Specification)](https://developers.google.com/transit/gtfs/). A GTFS feed is a group of text files that contains infrequently changing transit data, like stops, routes, trips, and other schedule data. Transit agencies typically update their GTFS feed every few months.
 
@@ -32,9 +32,9 @@ This data is more difficult to query, but if you're enjoying this challenge try 
 - awesome-transit: https://github.com/CUTR-at-USF/awesome-transit
 - Us. If you are stuck, or need guidance, leave a comment to a line of code in Github or email us.
 
-## Some Hints & Guidelines
+## Some Guidelines & Hints
 
-- Build your API using any frameworks, tools, databases, or libraries you like.
+- Build your API using any Python frameworks, tools, databases, or libraries you like.
 - Write clean code. Bonus points for tests.
   - Your tests don't need to be extensive. Just check the basics. For example, does the routes query return more than 1 route?
 - You must work on this alone. Do not share the code challenge with others.
