@@ -6,7 +6,7 @@ Your task is to create a webpage that displays information about the Dockless Sc
 
 Here's an example user story that may help guide what you develop:
 
-> As a division manager for parking enforcement, I would like to be able to see statistics on dockless usage for a given date ranges (ex: SXSW, March 8 - March 17, 2019). 
+> As a division manager for parking enforcement, I would like to be able to see statistics on dockless usage for a given date range (ex: SXSW Festival, March 8-17, 2019). 
 >
 > I would like to see counts of these stats:
 > - Total # of Trips
