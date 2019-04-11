@@ -2,7 +2,20 @@
 
 ### Challenge
 
-Your task is to create a webpage that displays information about the Dockless Scooters in Austin. This is an open‐ended challenge, so feel free to show off your creativity. This data comes from our Open Data Portal. For documentation, visit: https://data.austintexas.gov/Transportation-and-Mobility/Dockless-Vehicle-Trips/7d8e-dm7r
+Your task is to create a webpage that displays information about the Dockless Scooters in Austin. This data comes from our Open Data Portal. For documentation, visit: https://data.austintexas.gov/Transportation-and-Mobility/Dockless-Vehicle-Trips/7d8e-dm7r
+
+Here's an example user story that may help guide what you develop:
+
+> As a division manager for parking enforcement, I would like to be able to see statistics on dockless usage for a given date ranges (ex: SXSW, March 8 - March 17, 2019). 
+>
+> I would like to see counts of these stats:
+> - Total # of Trips
+> - Total # of Miles
+> - Total # of Unique Units Identified
+> 
+> I would like this feature so that I can share ad-hoc reporting metrics with department executives and Council staff.
+>
+> _Bonus points if I can filter by mode (bike, scooter, all)._
 
 ### How does this work?
 
