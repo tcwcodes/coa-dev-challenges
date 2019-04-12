@@ -13,7 +13,7 @@ Here's an example user story that may help guide what you develop:
 > - Total # of Miles
 > - Total # of Unique Units Identified
 > 
-> I would like this feature so that I can share ad-hoc reporting metrics with department executives and Council staff.
+> In my role, I would like this feature so that I can share ad-hoc reporting metrics with department executives and Council staff.
 >
 > _Bonus points if I can filter by mode (bike, scooter, all)._
 
