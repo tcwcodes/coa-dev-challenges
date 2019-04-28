@@ -160,14 +160,14 @@ class App extends Component {
     }
     else {
       statsPanelDisplay = 
-        <h2>Select a start date and end date to see statistics.</h2>
+        <h2>Select start and end dates to see statistics.</h2>
     }
 
     return (
       <div className="App">
 
         <div>
-          <h1>Dockless Mobility</h1>
+          <h1>Dockless Mobility Usage</h1>
           <br></br>
         </div>
 
