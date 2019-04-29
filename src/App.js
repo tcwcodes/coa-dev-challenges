@@ -93,10 +93,6 @@ class App extends Component {
   }
 
   queryPortal() {
-    this.setState({
-      submitted: true,
-      loading: true
-    });
     // Here is a link to the API Documentation: https://dev.socrata.com/
     let baseURL = "https://data.austintexas.gov/resource/7d8e-dm7r.json?$limit=1000000&"
     let appToken = "OKLYqKegeOGOIG08OM1K7EEHV"
@@ -106,10 +102,17 @@ class App extends Component {
     // Make it so user chooses two dates in the proper order (or the same dates)
     // To do: Hide or deactivate button until correct dates are chosen
     if (!dateRangeStart || !dateRangeEnd) {
-      console.log("Please select starting and ending dates (even if they are the same).")
+      // console.log("Please select starting and ending dates (even if they are the same).")
     } else if (dateRangeStart > dateRangeEnd) {
-      console.log("Please choose a start date prior to your chosen end date.")
+      this.setState({
+        submitted: false,
+        loading: false
+      });
     } else {
+      this.setState({
+        submitted: true,
+        loading: true
+      });
       // Filter to include only trips that started AND ended in the specified query range
       let tripStartTimeRange = "start_time between '" + dateRangeStart + "' and '" + dateRangeEnd
       let tripEndTimeRange = "end_time between '" + dateRangeStart + "' and '" + dateRangeEnd
@@ -124,7 +127,7 @@ class App extends Component {
         }
       })
       .then(res => {
-        console.log(res);
+        // console.log(res);
         // Run calculations and store desired outputs into a new object
         let statsOutput = {
           totalTrips: res.data.length,
@@ -135,7 +138,7 @@ class App extends Component {
           stats: statsOutput,
           loading: false
         });
-        console.log(this.state);
+        // console.log(this.state);
       });
     }
   }
@@ -145,7 +148,6 @@ class App extends Component {
     const statsReady = this.state.stats.totalTrips;
     const loading = this.state.loading;
     const submitted = this.state.submitted;
-    console.log(submitted);
     let statsPanelDisplay;
     if (statsReady && loading === false && submitted === true) {
       statsPanelDisplay =
@@ -155,12 +157,9 @@ class App extends Component {
           dateEndFormatted={this.state.dateEndFormatted}
         />
     } else if (loading === true) {
-      statsPanelDisplay = 
-      <h2>Loading statistics. Be with you in a moment!</h2>      
-    }
-    else {
-      statsPanelDisplay = 
-        <h2>Select start and end dates to see statistics.</h2>
+      statsPanelDisplay = <h2>Loading statistics. Be with you in a moment!</h2>      
+    } else {
+      statsPanelDisplay = <h2>Select start and end dates to see statistics.</h2>
     }
 
     return (
