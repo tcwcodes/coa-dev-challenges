@@ -23,10 +23,23 @@ class App extends Component {
     this.queryPortal = this.queryPortal.bind(this);
     this.calculateTotalMiles = this.calculateTotalMiles.bind(this);
     this.calculateTotalUnits = this.calculateTotalUnits.bind(this);
+    this.reloadPanel = this.reloadPanel.bind(this);
   }
 
   componentDidMount() {
 
+  }
+
+  reloadPanel() {
+    this.setState({
+      dateStart: "",
+      dateEnd: "",
+      dateStartFormatted: "",
+      dateEndFormatted: "",
+      stats: {},
+      loading: false,
+      submitted: false
+    })
   }
 
   selectStartDate(event) {
@@ -127,7 +140,6 @@ class App extends Component {
         }
       })
       .then(res => {
-        // console.log(res);
         // Run calculations and store desired outputs into a new object
         let statsOutput = {
           totalTrips: res.data.length,
@@ -149,17 +161,65 @@ class App extends Component {
     const loading = this.state.loading;
     const submitted = this.state.submitted;
     let statsPanelDisplay;
+    let submitReloadButton;
+    let calendarDisplay;
     if (statsReady && loading === false && submitted === true) {
       statsPanelDisplay =
-        <StatsPanel
-          stats={this.state.stats}
-          dateStartFormatted={this.state.dateStartFormatted}
-          dateEndFormatted={this.state.dateEndFormatted}
-        />
+      <StatsPanel
+        stats={this.state.stats}
+        dateStartFormatted={this.state.dateStartFormatted}
+        dateEndFormatted={this.state.dateEndFormatted}
+      />
+      submitReloadButton =
+      <button
+        className="btn btn-primary"
+        type="submit"
+        onClick={this.reloadPanel}>
+        Reload
+      </button>
     } else if (loading === true) {
-      statsPanelDisplay = <h2>Loading statistics. Be with you in a moment!</h2>      
+      statsPanelDisplay = <div><h4>Loading statistics for date range<br></br>{this.state.dateStartFormatted} and {this.state.dateEndFormatted}.</h4>
+      <img src="loading.gif" alt="loading wheel"></img></div>
+      submitReloadButton =
+      <button
+        className="btn btn-primary"
+        type="submit"
+        onClick={this.reloadPanel}>
+        Cancel
+      </button>   
     } else {
-      statsPanelDisplay = <h2>Select start and end dates to see statistics.</h2>
+      statsPanelDisplay = 
+      <h4>
+        Select start and end dates to see statistics.
+      </h4>
+      submitReloadButton =
+      <button
+        className="btn btn-primary"
+        type="submit"
+        onClick={this.queryPortal}>
+        Submit
+      </button>
+      calendarDisplay =
+      <div className="row">
+        <div className="col-md-6">
+          <div className="Calendar">
+            <h4>Start date</h4>
+            <Calendar
+              onChange={this.selectStartDate}
+            />
+          </div>
+          <br></br>
+        </div>
+        <div className="col-md-6">
+          <div className="Calendar">
+            <h4>End date</h4>
+            <Calendar
+              onChange={this.selectEndDate}
+            />
+          </div>
+          <br></br>
+        </div>
+      </div>
     }
 
     return (
@@ -175,33 +235,11 @@ class App extends Component {
           <br></br>
         </div>
 
-        <div className="row">
-          <div className="col-md-6">
-            <div className="Calendar">
-              <h4>Start date</h4>
-              <Calendar
-                onChange={this.selectStartDate}
-              />
-            </div>
-            <br></br>
-          </div>
-          <div className="col-md-6">
-            <div className="Calendar">
-              <h4>End date</h4>
-              <Calendar
-                onChange={this.selectEndDate}
-              />
-            </div>
-            <br></br>
-          </div>
-        </div>
+        {calendarDisplay}
 
 
         <div>
-          <button
-            onClick={this.queryPortal}>
-            Submit
-          </button>  
+          {submitReloadButton}
         </div>
         <br></br>
 
