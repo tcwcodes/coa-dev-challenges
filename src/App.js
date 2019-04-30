@@ -13,14 +13,14 @@ class App extends Component {
       dateEnd: "",
       dateStartFormatted: "",
       dateEndFormatted: "",
+      today: new Date(),
       stats: {},
       loading: false,
-      submitted: false
     };
-    this.selectStartDate = this.selectStartDate.bind(this);
-    this.selectEndDate = this.selectEndDate.bind(this);
+    this.selectDateRange = this.selectDateRange.bind(this);
     this.convertDate = this.convertDate.bind(this);
     this.queryPortal = this.queryPortal.bind(this);
+    this.calculateStats = this.calculateStats.bind(this);
     this.calculateTotalMiles = this.calculateTotalMiles.bind(this);
     this.calculateTotalUnits = this.calculateTotalUnits.bind(this);
     this.reloadPanel = this.reloadPanel.bind(this);
@@ -30,26 +30,19 @@ class App extends Component {
 
   }
 
-  reloadPanel() {
-    this.setState({
-      dateStart: "",
-      dateEnd: "",
-      dateStartFormatted: "",
-      dateEndFormatted: "",
-      stats: {},
-      loading: false,
-      submitted: false
-    })
-  }
-
-  selectStartDate(event) {
-    let dateType = "dateStart";
-    this.convertDate(event, dateType);
-  }
-
-  selectEndDate(event) {
-    let dateType = "dateEnd";
-    this.convertDate(event, dateType);
+  //Determine whether use has selected a range or a single date, then pass to converDate function
+  selectDateRange(event) {
+    //If there are two objects, user has selected a range
+    if (event[1]) {
+      let startDate = event[0];
+      let endDate = event[1];
+      this.convertDate(startDate, "dateStart");
+      this.convertDate(endDate, "dateEnd");
+    // If there is only one object, user selected a single date
+    } else {
+      this.convertDate(event, "dateStart");
+      this.convertDate(event, "dateEnd");
+    };
   }
 
   // Convert the dates from the calendar to SODA format and then set state for the respective dates
@@ -75,11 +68,51 @@ class App extends Component {
       dateConverted = year + '-' + month + "-" + day + "T23:59:59.999"
     }
     dateFormatted = month + '-' + day + "-" + year;
+    // Set state with convert and formatted dates
     this.setState({
       [dateType] : dateConverted,
       [dateType + "Formatted"] : dateFormatted,
-      submitted : false
     });
+  }
+
+  queryPortal() {
+    // Here is a link to the API Documentation: https://dev.socrata.com/
+    let baseURL = "https://data.austintexas.gov/resource/7d8e-dm7r.json?$limit=1000000&"
+    let appToken = "OKLYqKegeOGOIG08OM1K7EEHV"
+    let dateRangeStart = this.state.dateStart
+    let dateRangeEnd = this.state.dateEnd
+    this.setState({
+      loading: true
+    });
+    // Filter to include only trips that started AND ended in the specified query range
+    let tripStartTimeRange = "start_time between '" + dateRangeStart + "' and '" + dateRangeEnd
+    let tripEndTimeRange = "end_time between '" + dateRangeStart + "' and '" + dateRangeEnd
+    let queryURL = "$where=" + tripStartTimeRange + "' AND " + tripEndTimeRange + "'"
+    // Query the Open Data Portal
+    axios({
+      method: 'get',
+      url: baseURL + queryURL,
+      headers: {
+        'X-App-Token' : appToken,
+      }
+    })
+    .then(res => {
+      this.calculateStats(res.data);
+    });
+  }
+
+  // Run calculations and store desired outputs into a new object
+  calculateStats(data) {
+    let statsOutput = {
+      totalTrips: data.length,
+      totalMiles: this.calculateTotalMiles(data),
+      totalUnits: this.calculateTotalUnits(data)
+    };
+    this.setState({
+      stats: statsOutput,
+      loading: false
+    });
+    console.log(this.state);
   }
 
   calculateTotalMiles(data) {
@@ -105,120 +138,80 @@ class App extends Component {
     return unitsArray.length;
   }
 
-  queryPortal() {
-    // Here is a link to the API Documentation: https://dev.socrata.com/
-    let baseURL = "https://data.austintexas.gov/resource/7d8e-dm7r.json?$limit=1000000&"
-    let appToken = "OKLYqKegeOGOIG08OM1K7EEHV"
-    // The start and end dates the user puts in for the query range
-    let dateRangeStart = this.state.dateStart
-    let dateRangeEnd = this.state.dateEnd
-    // Make it so user chooses two dates in the proper order (or the same dates)
-    // To do: Hide or deactivate button until correct dates are chosen
-    if (!dateRangeStart || !dateRangeEnd) {
-      // console.log("Please select starting and ending dates (even if they are the same).")
-    } else if (dateRangeStart > dateRangeEnd) {
-      this.setState({
-        submitted: false,
-        loading: false
-      });
-    } else {
-      this.setState({
-        submitted: true,
-        loading: true
-      });
-      // Filter to include only trips that started AND ended in the specified query range
-      let tripStartTimeRange = "start_time between '" + dateRangeStart + "' and '" + dateRangeEnd
-      let tripEndTimeRange = "end_time between '" + dateRangeStart + "' and '" + dateRangeEnd
-      let queryURL = "$where=" + tripStartTimeRange + "' AND " + tripEndTimeRange + "'"
-      // console.log(baseURL + queryURL);
-      // Query the Open Data Portal
-      axios({
-        method: 'get',
-        url: baseURL + queryURL,
-        headers: {
-          'X-App-Token' : appToken,
-        }
-      })
-      .then(res => {
-        // Run calculations and store desired outputs into a new object
-        let statsOutput = {
-          totalTrips: res.data.length,
-          totalMiles: this.calculateTotalMiles(res.data),
-          totalUnits: this.calculateTotalUnits(res.data)
-        };
-        this.setState({
-          stats: statsOutput,
-          loading: false
-        });
-        // console.log(this.state);
-      });
-    }
+  reloadPanel() {
+    this.setState({
+      dateStart: "",
+      dateEnd: "",
+      dateStartFormatted: "",
+      dateEndFormatted: "",
+      today: new Date(),
+      stats: {},
+      loading: false,
+    })
   }
 
   render() {
 
     const statsReady = this.state.stats.totalTrips;
     const loading = this.state.loading;
-    const submitted = this.state.submitted;
     let statsPanelDisplay;
     let submitReloadButton;
     let calendarDisplay;
-    if (statsReady && loading === false && submitted === true) {
+    if (statsReady) {
       statsPanelDisplay =
-      <StatsPanel
-        stats={this.state.stats}
-        dateStartFormatted={this.state.dateStartFormatted}
-        dateEndFormatted={this.state.dateEndFormatted}
-      />
+      <div>
+        <StatsPanel
+          stats={this.state.stats}
+          dateStartFormatted={this.state.dateStartFormatted}
+          dateEndFormatted={this.state.dateEndFormatted}
+        />
+        <br></br>
+      </div>
       submitReloadButton =
-      <button
-        className="btn btn-primary"
-        type="submit"
-        onClick={this.reloadPanel}>
-        Reload
-      </button>
+      <div>
+        <button
+          className="btn btn-primary"
+          type="submit"
+          onClick={this.reloadPanel}>
+          Reload
+        </button>
+        <br></br>
+      </div>
     } else if (loading === true) {
-      statsPanelDisplay = <div><h4>Loading statistics for date range<br></br>{this.state.dateStartFormatted} and {this.state.dateEndFormatted}.</h4>
-      <img src="loading.gif" alt="loading wheel"></img></div>
-      submitReloadButton =
-      <button
-        className="btn btn-primary"
-        type="submit"
-        onClick={this.reloadPanel}>
-        Cancel
-      </button>   
+      statsPanelDisplay =
+      <div>
+        <h4>Loading statistics for date range<br></br>{this.state.dateStartFormatted} and {this.state.dateEndFormatted}.</h4>
+        <img src="loading.gif" alt="loading wheel"></img>
+        <br></br>
+      </div>
+      submitReloadButton = ""
     } else {
       statsPanelDisplay = 
-      <h4>
-        Select start and end dates to see statistics.
-      </h4>
+      <div>
+        <h4>
+          Select start and end dates to see statistics.
+        </h4>
+        <br></br>
+      </div>
       submitReloadButton =
-      <button
-        className="btn btn-primary"
-        type="submit"
-        onClick={this.queryPortal}>
-        Submit
-      </button>
+      <div>
+        <button
+          className="btn btn-primary"
+          type="submit"
+          onClick={this.queryPortal}>
+          Submit
+        </button>
+        <br></br>
+      </div>
       calendarDisplay =
-      <div className="row">
-        <div className="col-md-6">
-          <div className="Calendar">
-            <h4>Start date</h4>
-            <Calendar
-              onChange={this.selectStartDate}
-            />
-          </div>
-          <br></br>
-        </div>
-        <div className="col-md-6">
-          <div className="Calendar">
-            <h4>End date</h4>
-            <Calendar
-              onChange={this.selectEndDate}
-            />
-          </div>
-          <br></br>
-        </div>
+      <div className="Calendar">
+        <Calendar
+          onChange={this.selectDateRange}
+          onClickDay={this.selectDateRange}
+          maxDate={this.state.today}
+          selectRange={true}
+        />
+        <br></br>
       </div>
     }
 
@@ -230,18 +223,11 @@ class App extends Component {
           <br></br>
         </div>
 
-        <div>
-          {statsPanelDisplay}
-          <br></br>
-        </div>
+        {statsPanelDisplay}
 
         {calendarDisplay}
 
-
-        <div>
-          {submitReloadButton}
-        </div>
-        <br></br>
+        {submitReloadButton}
 
       </div>
     );
