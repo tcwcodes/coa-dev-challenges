@@ -189,7 +189,7 @@ class App extends Component {
       statsPanelDisplay = 
       <div>
         <h4>
-          Select start and end dates to see statistics.
+          Select dates for statistics.
         </h4>
         <br></br>
       </div>
