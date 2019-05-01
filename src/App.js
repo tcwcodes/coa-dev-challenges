@@ -15,14 +15,17 @@ class App extends Component {
       dateEndFormatted: "",
       today: new Date(),
       stats: {},
+      totalTrips: "",
+      totalMiles: "",
+      totalUnits: "",
       loading: false,
     };
     this.selectDateRange = this.selectDateRange.bind(this);
     this.convertDate = this.convertDate.bind(this);
-    this.queryPortal = this.queryPortal.bind(this);
-    this.calculateStats = this.calculateStats.bind(this);
-    this.calculateTotalMiles = this.calculateTotalMiles.bind(this);
-    this.calculateTotalUnits = this.calculateTotalUnits.bind(this);
+    this.buildQuery = this.buildQuery.bind(this);
+    this.queryTrips = this.queryTrips.bind(this);
+    this.queryMiles = this.queryMiles.bind(this);
+    this.queryUnits = this.queryUnits.bind(this);
     this.reloadPanel = this.reloadPanel.bind(this);
   }
 
@@ -75,67 +78,76 @@ class App extends Component {
     });
   }
 
-  queryPortal() {
-    // Here is a link to the API Documentation: https://dev.socrata.com/
-    let baseURL = "https://data.austintexas.gov/resource/7d8e-dm7r.json?$limit=1000000&"
+  buildQuery() {
+    let baseURL = "https://data.austintexas.gov/resource/7d8e-dm7r.json?$limit=100000000&"
     let appToken = "OKLYqKegeOGOIG08OM1K7EEHV"
     let dateRangeStart = this.state.dateStart
     let dateRangeEnd = this.state.dateEnd
-    this.setState({
-      loading: true
-    });
-    // Filter to include only trips that started AND ended in the specified query range
-    let tripStartTimeRange = "start_time between '" + dateRangeStart + "' and '" + dateRangeEnd
-    let tripEndTimeRange = "end_time between '" + dateRangeStart + "' and '" + dateRangeEnd
-    let queryURL = "$where=" + tripStartTimeRange + "' AND " + tripEndTimeRange + "'"
+    // let queryTotalMiles;
+    const minDistance = 160.934
+    const maxDistance = 804672
+    const minDuration = 0
+    const maxDuraction = 86400
+      // Filter to include only trips that started AND ended in the specified query range
+      let tripStartTimeRange = "start_time between '" + dateRangeStart + "' and '" + dateRangeEnd
+      let distanceRange = "trip_distance between " + minDistance + " and " + maxDistance
+      let durationRange = "trip_duration between " + minDuration + " and " + maxDuraction
+      let queryURL = "$where=" + tripStartTimeRange + "' AND " + distanceRange + " AND " + durationRange
+      this.setState({
+        loading: true
+      });
+    this.queryTrips(baseURL, queryURL, appToken);
+    this.queryMiles(baseURL, queryURL, appToken);
+    this.queryUnits(baseURL, tripStartTimeRange, appToken);   
+  }
+
+  queryTrips(baseURL, queryURL, appToken) {
+    let tripsQuery = "&$select=count(trip_id)";
     // Query the Open Data Portal
     axios({
       method: 'get',
-      url: baseURL + queryURL,
+      url: baseURL + queryURL + tripsQuery,
       headers: {
         'X-App-Token' : appToken,
       }
     })
     .then(res => {
-      this.calculateStats(res.data);
+      let queryTotalTrips = parseInt(res.data[0].count_trip_id);
+      this.setState({ totalTrips: queryTotalTrips});
+    });  
+  }
+
+  queryMiles(baseURL, queryURL, appToken) {
+    let milesQuery = "&$select=sum(trip_distance)";
+    // Query the Open Data Portal
+    axios({
+      method: 'get',
+      url: baseURL + queryURL + milesQuery,
+      headers: {
+        'X-App-Token' : appToken,
+      }
+    })
+    .then(res => {
+      let queryTotalMiles = Math.round(res.data[0].sum_trip_distance * 0.000621371)
+      this.setState({ totalMiles: queryTotalMiles});
     });
   }
 
-  // Run calculations and store desired outputs into a new object
-  calculateStats(data) {
-    let statsOutput = {
-      totalTrips: data.length,
-      totalMiles: this.calculateTotalMiles(data),
-      totalUnits: this.calculateTotalUnits(data)
-    };
-    this.setState({
-      stats: statsOutput,
-      loading: false
+  queryUnits(baseURL, tripStartTimeRange, appToken) {
+    let queryURL = "$where=" + tripStartTimeRange + "'"
+    let unitsQuery = "&$select=distinct(device_id)";
+    // Query the Open Data Portal
+    axios({
+      method: 'get',
+      url: baseURL + queryURL + unitsQuery,
+      headers: {
+        'X-App-Token' : appToken,
+      }
+    })
+    .then(res => {
+      let queryTotalUnits = res.data.length;
+      this.setState({ totalUnits: queryTotalUnits})
     });
-    console.log(this.state);
-  }
-
-  calculateTotalMiles(data) {
-    let sum = 0;
-    let totalMiles;
-    let totalMilesRounded;
-    data.forEach(element => {
-      sum += parseInt(element.trip_distance)
-    });
-    totalMiles = sum * .000621371
-    totalMilesRounded = Math.round(totalMiles)
-    return totalMilesRounded;
-  }
-
-  calculateTotalUnits(data) {
-    let unitsArray = [];
-    data.forEach(element => {
-      if (unitsArray.includes(element.device_id)) {
-      } else {
-        unitsArray.push(element.device_id);
-      };
-    });
-    return unitsArray.length;
   }
 
   reloadPanel() {
@@ -146,14 +158,17 @@ class App extends Component {
       dateEndFormatted: "",
       today: new Date(),
       stats: {},
+      totalTrips: "",
+      totalMiles: "",
+      totalUnits: "",
       loading: false,
-    })
+    });
   }
 
   render() {
 
-    const statsReady = this.state.stats.totalTrips;
-    const loading = this.state.loading;
+    let statsReady = this.state.totalTrips && this.state.totalMiles && this.state.totalUnits;
+    let loading = this.state.loading;
     let statsPanelDisplay;
     let submitReloadButton;
     let calendarDisplay;
@@ -161,7 +176,9 @@ class App extends Component {
       statsPanelDisplay =
       <div>
         <StatsPanel
-          stats={this.state.stats}
+          totalTrips={this.state.totalTrips}
+          totalMiles={this.state.totalMiles}
+          totalUnits={this.state.totalUnits}
           dateStartFormatted={this.state.dateStartFormatted}
           dateEndFormatted={this.state.dateEndFormatted}
         />
@@ -185,11 +202,11 @@ class App extends Component {
         <br></br>
       </div>
       submitReloadButton = ""
-    } else {
+    } else if (this.state.dateStart && this.state.dateEnd) {
       statsPanelDisplay = 
       <div>
         <h4>
-          Select dates for statistics.
+          Select a date or range for data.
         </h4>
         <br></br>
       </div>
@@ -198,7 +215,7 @@ class App extends Component {
         <button
           className="btn btn-primary"
           type="submit"
-          onClick={this.queryPortal}>
+          onClick={this.buildQuery}>
           Submit
         </button>
         <br></br>
@@ -213,23 +230,37 @@ class App extends Component {
         />
         <br></br>
       </div>
+    } else {
+      statsPanelDisplay = 
+      <div>
+        <h4>
+        Select a date or range for data.
+        </h4>
+        <br></br>
+      </div>
+      submitReloadButton = ""
+      calendarDisplay =
+      <div className="Calendar">
+        <Calendar
+          onChange={this.selectDateRange}
+          onClickDay={this.selectDateRange}
+          maxDate={this.state.today}
+          selectRange={true}
+        />
+        <br></br>
+      </div>
     }
 
     return (
       <div className="App">
-
         <div>
           <br></br>
           <h1>Dockless Mobility Usage</h1>
           <br></br>
         </div>
-
         {statsPanelDisplay}
-
         {calendarDisplay}
-
         {submitReloadButton}
-
       </div>
     );
   }
