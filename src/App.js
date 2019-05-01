@@ -112,7 +112,7 @@ class App extends Component {
       }
     })
     .then(res => {
-      let queryTotalTrips = parseInt(res.data[0].count_trip_id);
+      let queryTotalTrips = parseInt(res.data[0].count_trip_id).toString().replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1,')
       this.setState({ totalTrips: queryTotalTrips});
     });  
   }
@@ -128,7 +128,7 @@ class App extends Component {
       }
     })
     .then(res => {
-      let queryTotalMiles = Math.round(res.data[0].sum_trip_distance * 0.000621371)
+      let queryTotalMiles = Math.round(res.data[0].sum_trip_distance * 0.000621371).toString().replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1,')
       this.setState({ totalMiles: queryTotalMiles});
     });
   }
@@ -145,7 +145,7 @@ class App extends Component {
       }
     })
     .then(res => {
-      let queryTotalUnits = res.data.length;
+      let queryTotalUnits = res.data.length.toString().replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1,');
       this.setState({ totalUnits: queryTotalUnits})
     });
   }
