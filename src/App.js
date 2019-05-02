@@ -1,6 +1,7 @@
 import React, { Component } from "react";
 import Calendar from 'react-calendar';
 import StatsPanel from "./components/StatsPanel";
+
 import "./App.css";
 
 import axios from "axios";
@@ -13,8 +14,8 @@ class App extends Component {
       dateEnd: "",
       dateStartFormatted: "",
       dateEndFormatted: "",
+      vehicleType: " is not null",
       today: new Date(),
-      stats: {},
       totalTrips: "",
       totalMiles: "",
       totalUnits: "",
@@ -22,6 +23,7 @@ class App extends Component {
     };
     this.selectDateRange = this.selectDateRange.bind(this);
     this.convertDate = this.convertDate.bind(this);
+    this.selectMode = this.selectMode.bind(this);
     this.buildQuery = this.buildQuery.bind(this);
     this.queryTrips = this.queryTrips.bind(this);
     this.queryMiles = this.queryMiles.bind(this);
@@ -78,27 +80,33 @@ class App extends Component {
     });
   }
 
+  selectMode(event) {
+    this.setState({vehicleType: event.target.value});
+  }
+
   buildQuery() {
     let baseURL = "https://data.austintexas.gov/resource/7d8e-dm7r.json?$limit=100000000&"
     let appToken = "OKLYqKegeOGOIG08OM1K7EEHV"
     let dateRangeStart = this.state.dateStart
     let dateRangeEnd = this.state.dateEnd
-    // let queryTotalMiles;
+    let vehicleType = this.state.vehicleType
     const minDistance = 160.934
     const maxDistance = 804672
     const minDuration = 0
     const maxDuraction = 86400
-      // Filter to include only trips that started AND ended in the specified query range
-      let tripStartTimeRange = "start_time between '" + dateRangeStart + "' and '" + dateRangeEnd
-      let distanceRange = "trip_distance between " + minDistance + " and " + maxDistance
-      let durationRange = "trip_duration between " + minDuration + " and " + maxDuraction
-      let queryURL = "$where=" + tripStartTimeRange + "' AND " + distanceRange + " AND " + durationRange
-      this.setState({
-        loading: true
-      });
+    // Filter to include only trips in the specified query range
+    let tripStartTimeRange = "start_time between '" + dateRangeStart + "' and '" + dateRangeEnd
+    let distanceRange = "trip_distance between " + minDistance + " and " + maxDistance
+    let durationRange = "trip_duration between " + minDuration + " and " + maxDuraction
+    let vehicleSelection = "vehicle_type" + vehicleType
+    let queryURL = "$where=" + tripStartTimeRange + "' AND " + distanceRange + " AND " + durationRange + " AND " + vehicleSelection
+    console.log(queryURL);
+    this.setState({
+      loading: true
+    });
     this.queryTrips(baseURL, queryURL, appToken);
     this.queryMiles(baseURL, queryURL, appToken);
-    this.queryUnits(baseURL, tripStartTimeRange, appToken);   
+    this.queryUnits(baseURL, tripStartTimeRange, vehicleSelection, appToken);
   }
 
   queryTrips(baseURL, queryURL, appToken) {
@@ -133,8 +141,8 @@ class App extends Component {
     });
   }
 
-  queryUnits(baseURL, tripStartTimeRange, appToken) {
-    let queryURL = "$where=" + tripStartTimeRange + "'"
+  queryUnits(baseURL, tripStartTimeRange, vehicleSelection, appToken) {
+    let queryURL = "$where=" + tripStartTimeRange + "' AND " + vehicleSelection
     let unitsQuery = "&$select=distinct(device_id)";
     // Query the Open Data Portal
     axios({
@@ -156,8 +164,8 @@ class App extends Component {
       dateEnd: "",
       dateStartFormatted: "",
       dateEndFormatted: "",
+      vehicleType: " is not null",
       today: new Date(),
-      stats: {},
       totalTrips: "",
       totalMiles: "",
       totalUnits: "",
@@ -172,6 +180,7 @@ class App extends Component {
     let statsPanelDisplay;
     let submitReloadButton;
     let calendarDisplay;
+    let modeSelector;
     if (statsReady) {
       statsPanelDisplay =
       <div>
@@ -220,6 +229,18 @@ class App extends Component {
         </button>
         <br></br>
       </div>
+      modeSelector = 
+        <div className="row">
+        <div className="col-md-4"></div>
+            <div className="form-group col-md-4">
+                    <select className="form-control" value={this.state.vehicleType} onChange={this.selectMode}>
+                        <option value=" is not null">Select mode (optional)</option>
+                        <option value="='scooter'">Scooter</option>
+                        <option value="='bicycle'">Bicycle</option>
+                    </select>
+            </div>
+        <div className="col-md-4"></div>
+      </div>
       calendarDisplay =
       <div className="Calendar">
         <Calendar
@@ -260,6 +281,7 @@ class App extends Component {
         </div>
         {statsPanelDisplay}
         {calendarDisplay}
+        {modeSelector}
         {submitReloadButton}
       </div>
     );
