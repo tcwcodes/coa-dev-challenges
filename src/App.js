@@ -100,7 +100,6 @@ class App extends Component {
     let durationRange = "trip_duration between " + minDuration + " and " + maxDuraction
     let vehicleSelection = "vehicle_type" + vehicleType
     let queryURL = "$where=" + tripStartTimeRange + "' AND " + distanceRange + " AND " + durationRange + " AND " + vehicleSelection
-    console.log(queryURL);
     this.setState({
       loading: true
     });
