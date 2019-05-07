@@ -1,9 +1,9 @@
 import React, { Component } from "react";
-import Calendar from 'react-calendar';
 import StatsPanel from "./components/StatsPanel";
-
+import SubmitReloadButton from "./components/SubmitReloadButton";
+import ModeSelector from "./components/ModeSelector";
+import CalendarDisplay from "./components/CalendarDisplay";
 import "./App.css";
-
 import axios from "axios";
 
 class App extends Component {
@@ -173,104 +173,6 @@ class App extends Component {
   }
 
   render() {
-
-    let statsReady = this.state.totalTrips && this.state.totalMiles && this.state.totalUnits;
-    let loading = this.state.loading;
-    let statsPanelDisplay;
-    let submitReloadButton;
-    let calendarDisplay;
-    let modeSelector;
-    if (statsReady) {
-      statsPanelDisplay =
-      <div>
-        <StatsPanel
-          totalTrips={this.state.totalTrips}
-          totalMiles={this.state.totalMiles}
-          totalUnits={this.state.totalUnits}
-          dateStartFormatted={this.state.dateStartFormatted}
-          dateEndFormatted={this.state.dateEndFormatted}
-        />
-        <br></br>
-      </div>
-      submitReloadButton =
-      <div>
-        <button
-          className="btn btn-primary"
-          type="submit"
-          onClick={this.reloadPanel}>
-          Reload
-        </button>
-        <br></br>
-      </div>
-    } else if (loading === true) {
-      statsPanelDisplay =
-      <div>
-        <h4>Loading statistics for date range<br></br>{this.state.dateStartFormatted} and {this.state.dateEndFormatted}.</h4>
-        <img src="loading.gif" alt="loading wheel"></img>
-        <br></br>
-      </div>
-      submitReloadButton = ""
-    } else if (this.state.dateStart && this.state.dateEnd) {
-      statsPanelDisplay = 
-      <div>
-        <h4>
-          Select a date or range for data.
-        </h4>
-        <br></br>
-      </div>
-      submitReloadButton =
-      <div>
-        <button
-          className="btn btn-primary"
-          type="submit"
-          onClick={this.buildQuery}>
-          Submit
-        </button>
-        <br></br>
-      </div>
-      modeSelector = 
-        <div className="row">
-        <div className="col-md-4"></div>
-            <div className="form-group col-md-4">
-                    <select className="form-control" value={this.state.vehicleType} onChange={this.selectMode}>
-                        <option value=" is not null">Select mode (optional)</option>
-                        <option value="='scooter'">Scooter</option>
-                        <option value="='bicycle'">Bicycle</option>
-                    </select>
-            </div>
-        <div className="col-md-4"></div>
-      </div>
-      calendarDisplay =
-      <div className="Calendar">
-        <Calendar
-          onChange={this.selectDateRange}
-          onClickDay={this.selectDateRange}
-          maxDate={this.state.today}
-          selectRange={true}
-        />
-        <br></br>
-      </div>
-    } else {
-      statsPanelDisplay = 
-      <div>
-        <h4>
-        Select a date or range for data.
-        </h4>
-        <br></br>
-      </div>
-      submitReloadButton = ""
-      calendarDisplay =
-      <div className="Calendar">
-        <Calendar
-          onChange={this.selectDateRange}
-          onClickDay={this.selectDateRange}
-          maxDate={this.state.today}
-          selectRange={true}
-        />
-        <br></br>
-      </div>
-    }
-
     return (
       <div className="App">
         <div>
@@ -278,10 +180,35 @@ class App extends Component {
           <h1>Dockless Mobility Usage</h1>
           <br></br>
         </div>
-        {statsPanelDisplay}
-        {calendarDisplay}
-        {modeSelector}
-        {submitReloadButton}
+        <StatsPanel
+          statsReady={this.state.totalTrips && this.state.totalMiles && this.state.totalUnits}
+          loading={this.state.loading}
+          totalTrips={this.state.totalTrips}
+          totalMiles={this.state.totalMiles}
+          totalUnits={this.state.totalUnits}
+          dateStartFormatted={this.state.dateStartFormatted}
+          dateEndFormatted={this.state.dateEndFormatted}
+        />
+        <CalendarDisplay
+          statsReady={this.state.totalTrips && this.state.totalMiles && this.state.totalUnits}
+          loading={this.state.loading}
+          today={this.state.today}
+          selectDateRange={this.selectDateRange}
+        />
+        <ModeSelector
+          statsReady={this.state.totalTrips && this.state.totalMiles && this.state.totalUnits}
+          loading={this.state.loading}
+          datesChosen={this.state.dateStart && this.state.dateEnd}
+          vehicleType={this.state.vehicleType}
+          selectMode={this.selectMode}
+        />
+        <SubmitReloadButton
+          statsReady={this.state.totalTrips && this.state.totalMiles && this.state.totalUnits}
+          loading={this.state.loading}
+          datesChosen={this.state.dateStart && this.state.dateEnd}
+          reloadPanel={this.reloadPanel}
+          buildQuery={this.buildQuery}
+        />
       </div>
     );
   }
